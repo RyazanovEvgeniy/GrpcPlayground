@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcPlayground";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+package weather;
+
+service Weather {
+  rpc GetCurrentWeather (GerCurrentWeatherRequest) returns (WeatherResponse);
+  rpc GetCurrentWeatherStream (GerCurrentWeatherRequest) returns (stream WeatherResponse);
+  rpc GetMultiCurrentWeatherStream (stream GerCurrentWeatherRequest) returns (MultiWeatherResponse);
+}
+
+message GerCurrentWeatherRequest {
+  string city = 1;
+  Units units = 2;
+}
+
+message WeatherResponse {
+  double temperature = 1;
+  double feels_like = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  string city = 4;
+  Units units = 5;
+}
+
+message MultiWeatherResponse {
+  repeated WeatherResponse weather = 1;
+}
+
+enum Units {
+  Standard = 0;
+  Metric = 1;
+  Imperial = 2;
+}
