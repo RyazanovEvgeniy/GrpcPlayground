@@ -15,8 +15,10 @@ try
 
     builder.Host.UseSerilog();
 
+    builder.Services.AddScoped<LoggerInterceptor>();
     builder.Services.AddScoped<IWeatherService, WeatherService>();
-    builder.Services.AddGrpcClient<Weather.WeatherClient>((services, options) => options.Address = new Uri("https://localhost:3000"));
+    builder.Services.AddGrpcClient<Weather.WeatherClient>((services, options) => options.Address = new Uri("https://localhost:3000"))
+                    .AddInterceptor<LoggerInterceptor>();
 
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();

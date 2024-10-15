@@ -7,50 +7,31 @@ public class LoggerInterceptor(ILogger<LoggerInterceptor> logger) : Interceptor
 {
     private readonly ILogger<LoggerInterceptor> _logger = logger;
 
-    public override Task<TResponse> UnaryServerHandler<TRequest, TResponse>(TRequest request, ServerCallContext context, UnaryServerMethod<TRequest, TResponse> continuation)
-    {
-        _logger.LogInformation("Procedure call. Type: {method}. Request: {request}. Response: {response}",
-                                MethodType.Unary,
-                                typeof(TRequest),
-                                typeof(TResponse));
-        return base.UnaryServerHandler(request, context, continuation);
-    }
-
-    public override Task<TResponse> ClientStreamingServerHandler<TRequest, TResponse>(
-        IAsyncStreamReader<TRequest> requestStream,
-        ServerCallContext context,
-        ClientStreamingServerMethod<TRequest, TResponse> continuation)
-    {
-        _logger.LogInformation("Procedure call. Type: {method}. Request: {request}. Response: {response}",
-                                MethodType.ClientStreaming,
-                                typeof(TRequest),
-                                typeof(TResponse));
-        return base.ClientStreamingServerHandler(requestStream, context, continuation);
-    }
-
-    public override Task ServerStreamingServerHandler<TRequest, TResponse>(
+    public override AsyncUnaryCall<TResponse> AsyncUnaryCall<TRequest, TResponse>(
         TRequest request,
-        IServerStreamWriter<TResponse> responseStream,
-        ServerCallContext context,
-        ServerStreamingServerMethod<TRequest, TResponse> continuation)
+        ClientInterceptorContext<TRequest, TResponse> context,
+        AsyncUnaryCallContinuation<TRequest, TResponse> continuation)
     {
-        _logger.LogInformation("Procedure call. Type: {method}. Request: {request}. Response: {response}",
-                                MethodType.ServerStreaming,
-                                typeof(TRequest),
-                                typeof(TResponse));
-        return base.ServerStreamingServerHandler(request, responseStream, context, continuation);
+        _logger.LogInformation("Starting call. Type: {type}. Request: {request}. Response: {response}",
+                                context.Method.Type, typeof(TRequest), typeof(TResponse));
+
+        var call = continuation(request, context);
+
+        return new AsyncUnaryCall<TResponse>(HandleResponse(call.ResponseAsync), call.ResponseHeadersAsync, call.GetStatus, call.GetTrailers, call.Dispose);
     }
 
-    public override Task DuplexStreamingServerHandler<TRequest, TResponse>(
-        IAsyncStreamReader<TRequest> requestStream,
-        IServerStreamWriter<TResponse> responseStream,
-        ServerCallContext context,
-        DuplexStreamingServerMethod<TRequest, TResponse> continuation)
+    private async Task<TResponse> HandleResponse<TResponse>(Task<TResponse> tResponse)
     {
-        _logger.LogInformation("Procedure call. Type: {method}. Request: {request}. Response: {response}",
-                                MethodType.DuplexStreaming,
-                                typeof(TRequest),
-                                typeof(TResponse));
-        return base.DuplexStreamingServerHandler(requestStream, responseStream, context, continuation);
+        try
+        {
+            var response = await tResponse;
+            _logger.LogInformation("Response received: {response}", response);
+            return response;
+        }
+        catch (RpcException ex)
+        {
+            _logger.LogError(ex, "Error: {message}", ex.Message);
+            return default;
+        }
     }
 }
