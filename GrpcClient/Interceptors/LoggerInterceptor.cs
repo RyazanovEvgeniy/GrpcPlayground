@@ -1,7 +1,7 @@
 using Grpc.Core;
 using Grpc.Core.Interceptors;
 
-namespace GrpcPlayground.Interceptors;
+namespace GrpcClient.Interceptors;
 
 public class LoggerInterceptor(ILogger<LoggerInterceptor> logger) : Interceptor
 {

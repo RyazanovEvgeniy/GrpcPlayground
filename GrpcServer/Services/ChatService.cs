@@ -1,7 +1,8 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using GrpcContracts;
 
-namespace GrpcPlayground.Services;
+namespace GrpcServer.Services;
 
 public class ChatService(ILogger<WeatherService> logger) : Chat.ChatBase
 {

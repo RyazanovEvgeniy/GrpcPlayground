@@ -1,7 +1,8 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using GrpcContracts;
 
-namespace GrpcPlayground.Services;
+namespace GrpcServer.Services;
 
 public class WeatherService(ILogger<WeatherService> logger) : Weather.WeatherBase
 {
@@ -9,6 +10,8 @@ public class WeatherService(ILogger<WeatherService> logger) : Weather.WeatherBas
 
     public override Task<WeatherResponse> GetCurrentWeather(GerCurrentWeatherRequest request, ServerCallContext context)
     {
+        throw new RpcException(new Status(StatusCode.Internal, "~!<Test>!~"));
+
         return Task.FromResult(new WeatherResponse
         {
             Temperature = new Random().Next(5),

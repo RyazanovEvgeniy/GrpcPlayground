@@ -1,7 +1,7 @@
 using Serilog;
 
-using GrpcPlayground.Services;
-using GrpcPlayground.Interceptors;
+using GrpcServer.Services;
+using GrpcServer.Interceptors;
 
 var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(configuration).CreateLogger();
